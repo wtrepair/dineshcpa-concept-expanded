@@ -330,7 +330,8 @@ function Header() {
 function Hero() {
   return (
     <section className="heroSection">
-      <div className="heroMedia" style={{ backgroundImage: "url('/assets/hero-finance.png')" }}>
+      <div className="heroMedia" data-scroll-scene>
+        <div className="heroArtwork" aria-hidden="true" style={{ backgroundImage: "url('/assets/hero-finance.png')" }} />
         <div className="heroCopy">
           <span>Tax strategy, filings, and advisory</span>
           <h1>Clarity for complex personal and business tax</h1>
@@ -347,6 +348,7 @@ function Hero() {
             </a>
           </div>
         </div>
+        <a className="heroScrollCue" href="#benefits">Scroll to explore <ChevronDown size={18} aria-hidden="true" /></a>
       </div>
     </section>
   );
@@ -355,7 +357,7 @@ function Hero() {
 function Intro() {
   return (
     <section className="introPanel">
-      <div className="imagePanel">
+      <div className="imagePanel" data-scroll-scene>
         <img src="/assets/about-desk.png" alt="Accounting desk with notebook, calculator, pen, and coffee" />
       </div>
       <div className="introCopy">
@@ -398,7 +400,7 @@ function Benefits() {
 
 function ReviewCta() {
   return (
-    <section className="reviewCta">
+    <section className="reviewCta" data-scroll-scene>
       <div className="reviewText">
         <strong>Maximize Your Tax Savings:</strong>
           <h2>Your 10-Year Tax Review</h2>
@@ -447,7 +449,8 @@ function ServiceDialog({ service, open, onClose }) {
 function ServiceCard({ service }) {
   const [open, setOpen] = useState(false);
   return (
-    <article className="serviceCard" style={{ backgroundImage: `url('${service.image}')` }}>
+    <article className="serviceCard">
+      <div className="serviceArtwork" aria-hidden="true" style={{ backgroundImage: `url('${service.image}')` }} />
       <div>
         <h3>{service.title}</h3>
         <p>{service.summary}</p>
@@ -646,7 +649,7 @@ function CoverageSection() {
 function ProcessSection() {
   return (
     <section className="processSection">
-      <div className="processMedia">
+      <div className="processMedia" data-scroll-scene>
         <img src="/assets/contact-typing.png" alt="Hands typing on a laptop for tax planning" />
       </div>
       <div className="processCopy">
@@ -713,7 +716,7 @@ function Testimonials() {
       >
         <ArrowLeft size={28} />
       </button>
-      <div className="testimonialContent">
+      <div className="testimonialContent" key={index} aria-live="polite" aria-atomic="true">
         <SectionTitle eyebrow="Testimonials" title="What Our Clients Are Saying" light />
         <blockquote>
           <strong>{current.quote.split(".")[0]}.</strong>
