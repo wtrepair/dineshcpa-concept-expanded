@@ -1,9 +1,9 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useId, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
+import { createPortal } from "react-dom";
 import {
   ArrowLeft,
   ArrowRight,
-  Bell,
   BriefcaseBusiness,
   Building2,
   Check,
@@ -14,16 +14,18 @@ import {
   Landmark,
   MapPin,
   Menu,
-  Minus,
   Phone,
   Plus,
   ReceiptText,
-  Search,
   ShieldCheck,
   Smartphone,
   X,
 } from "lucide-react";
 import "./styles.css";
+import Experience from "./Experience.jsx";
+import { personalServices, corporateServices, specializedServices } from "./serviceCopy.js";
+
+const PARTNER_URL = "https://boldsmith.ca/partner/dineshcpa";
 
 const navItems = [
   { label: "Personal", href: "#personal" },
@@ -49,75 +51,6 @@ const benefits = [
     title: "Strategic Advantage",
     body: "Every file is approached with planning discipline: claim optimization, audit readiness, and a practical path to better financial decisions.",
     tag: "Planning | Compliance",
-  },
-];
-
-const personalServices = [
-  {
-    title: "Canadian Personal Tax Return Filing",
-    image: "/assets/tax-filing.png",
-    detail:
-      "Accurate T1 preparation for employment, self-employment, rental, investment, and family situations with deduction and credit review.",
-  },
-  {
-    title: "Canadian Cross-Border Tax Filing",
-    image: "/assets/us-tax.png",
-    detail:
-      "Support for Canadian residents and mobile clients with foreign income, disclosure questions, and coordinated filing needs.",
-  },
-  {
-    title: "Tax Compliance Assurance",
-    image: "/assets/tax-compliance.png",
-    detail:
-      "Review, response, and documentation support for CRA letters, prior filings, missing slips, and unresolved personal tax matters.",
-  },
-  {
-    title: "Non-Resident Taxation",
-    image: "/assets/non-resident.png",
-    detail:
-      "Advice for non-residents and newcomers dealing with Canadian source income, property, departure matters, and withholding rules.",
-  },
-  {
-    title: "Audit Readiness Services",
-    image: "/assets/audit-ready.png",
-    detail:
-      "Organized records, issue spotting, and response preparation so audits and reviews can be handled calmly and defensibly.",
-  },
-];
-
-const corporateServices = [
-  "10-Year Tax Review",
-  "Canadian Business Tax Return Filing",
-  "Cross-Border Business Tax Coordination",
-  "GST, Payroll, and WSIB Filings",
-  "Fractional CFO Services",
-  "Business Sale and Succession Planning",
-  "Business Incorporation",
-  "Foreign Income Reporting",
-  "SR&ED Support",
-  "Valuations",
-];
-
-const specializedServices = [
-  {
-    title: "Pre-Construction Assignment and HST Solutions",
-    image: "/assets/non-resident.png",
-    body: "GST/HST review, rebate support, and planning around property transactions where details can change the outcome.",
-  },
-  {
-    title: "Canadian Cross-Border Tax Services",
-    image: "/assets/us-tax.png",
-    body: "Coordinated filings and guidance for Canadian individuals, owners, and mobile professionals with foreign activity.",
-  },
-  {
-    title: "Rebate Filing and Property Declarations",
-    image: "/assets/piggy-bank.png",
-    body: "Structured support for rebates, declarations, and compliance-sensitive property documents.",
-  },
-  {
-    title: "Student Tax Return Special",
-    image: "/assets/about-desk.png",
-    body: "Simple, cost-conscious filing support for students and recent graduates building good habits early.",
   },
 ];
 
@@ -359,24 +292,25 @@ function Logo({ large = false }) {
 
 function Header() {
   const [open, setOpen] = useState(false);
+  const menuRef = useRef(null);
+  useEffect(() => {
+    function dismiss(event) {
+      if (event.key === "Escape" && open) {
+        setOpen(false);
+        menuRef.current?.focus();
+      }
+    }
+    document.addEventListener("keydown", dismiss);
+    return () => document.removeEventListener("keydown", dismiss);
+  }, [open]);
   return (
     <header className="siteHeader" id="top">
-      <div className="marketsBar" aria-label="Market data strip">
-        {["Ethereum 1734.4", "S&P 500 4538.9", "EUR to USD 1.0907", "US 100 14373.2", "NVDA 485.48", "META 300.15"].map(
-          (item, index) => (
-            <span key={item} className={index % 2 ? "down" : "up"}>
-              {item}
-            </span>
-          ),
-        )}
-        <a href="#insights">Visit Markets Data</a>
-      </div>
       <nav className="navShell" aria-label="Primary navigation">
         <Logo />
-        <button className="menuButton" onClick={() => setOpen((value) => !value)} aria-label="Toggle navigation">
+        <button ref={menuRef} className="menuButton" onClick={() => setOpen((value) => !value)} aria-label={open ? "Close navigation" : "Open navigation"} aria-expanded={open} aria-controls="primary-links">
           {open ? <X size={22} /> : <Menu size={22} />}
         </button>
-        <div className={`navLinks ${open ? "open" : ""}`}>
+        <div id="primary-links" className={`navLinks ${open ? "open" : ""}`}>
           {navItems.map((item) => (
             <a key={item.label} href={item.href} onClick={() => setOpen(false)}>
               {item.label}
@@ -384,15 +318,9 @@ function Header() {
           ))}
         </div>
         <div className="navActions">
-          <label className="searchBox">
-            <span className="srOnly">Search</span>
-            <input placeholder="Last Name" />
-            <Search size={14} />
-          </label>
-          <a className="signIn" href="#contact">
-            Sign In
+          <a className="button dark navCta" href="#contact">
+            Let’s talk <ArrowRight size={16} aria-hidden="true" />
           </a>
-          <Bell size={17} aria-hidden="true" />
         </div>
       </nav>
     </header>
@@ -412,7 +340,7 @@ function Hero() {
           </p>
           <div className="heroActions">
             <a className="button light" href="#contact">
-              Book Free 10-Year Review
+              Book a 10-Year Review
             </a>
             <a className="textLink" href="#personal">
               Explore services
@@ -473,7 +401,7 @@ function ReviewCta() {
     <section className="reviewCta">
       <div className="reviewText">
         <strong>Maximize Your Tax Savings:</strong>
-        <h2>Free 10-Year Tax Review</h2>
+          <h2>Your 10-Year Tax Review</h2>
         <a className="button dark" href="#contact">
           Here's the next step.
         </a>
@@ -483,22 +411,56 @@ function ReviewCta() {
   );
 }
 
-function ServiceCard({ service, active, onToggle }) {
+function ServiceDialog({ service, open, onClose }) {
+  const dialogRef = useRef(null);
+  const titleId = useId();
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!open) return;
+    const previousOverflow = document.body.style.overflow;
+    dialog.showModal();
+    document.body.style.overflow = "hidden";
+    return () => {
+      dialog.close();
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [open]);
+  return createPortal(
+    <dialog ref={dialogRef} className="serviceDialog" aria-labelledby={titleId} onClose={onClose} onClick={(event) => {
+      if (event.target === event.currentTarget) {
+        const bounds = event.currentTarget.getBoundingClientRect();
+        if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) onClose();
+      }
+    }}>
+      <button type="button" className="dialogClose" aria-label="Close service details" onClick={onClose} autoFocus><X size={22} /></button>
+      <span className="dialogEyebrow">How we can help</span>
+      <h2 id={titleId}>{service.title}</h2>
+      <p className="serviceDialogIntro">{service.detail}</p>
+      <ul className="serviceDetailList">
+        {service.highlights.map((item) => <li key={item}><Check size={18} aria-hidden="true" /><span>{item}</span></li>)}
+      </ul>
+      <a className="button dark" href="#contact" onClick={onClose}>Talk to us about this <ArrowRight size={17} aria-hidden="true" /></a>
+    </dialog>, document.body
+  );
+}
+
+function ServiceCard({ service }) {
+  const [open, setOpen] = useState(false);
   return (
-    <article className={`serviceCard ${active ? "active" : ""}`} style={{ backgroundImage: `url('${service.image}')` }}>
+    <article className="serviceCard" style={{ backgroundImage: `url('${service.image}')` }}>
       <div>
         <h3>{service.title}</h3>
-        <p>{service.detail || service.body}</p>
+        <p>{service.summary}</p>
       </div>
-      <button onClick={onToggle} aria-label={`Show details for ${service.title}`}>
-        {active ? <Minus size={24} /> : <Plus size={24} />}
+      <button type="button" className="serviceDetailsButton" onClick={() => setOpen(true)} aria-label={`Show details for ${service.title}`} aria-haspopup="dialog">
+        <Plus size={24} />
       </button>
+      <ServiceDialog service={service} open={open} onClose={() => setOpen(false)} />
     </article>
   );
 }
 
 function PersonalSection() {
-  const [active, setActive] = useState(0);
   return (
     <section className="personalSection" id="personal">
       <div className="pageHeading">
@@ -522,17 +484,15 @@ function PersonalSection() {
         subtitle="We'll Set the Record (and Savings) Straight."
       />
       <p className="centerCopy">
-        A risk-free way to revisit your taxes with no upfront cost. We uncover missed deductions, with only a small
-        admin fee and a 10% contingency on recovered funds.
+        Revisit past filings to look for missed deductions, credits and unresolved questions. We’ll explain the
+        review process and confirm the scope and fees before work begins.
       </p>
       <SectionTitle eyebrow="Taxes, audits, strategic planning and more..." title="Giving you the confidence to focus on what matters" />
       <div className="serviceRail" aria-label="Personal tax services">
-        {personalServices.map((service, index) => (
+        {personalServices.map((service) => (
           <ServiceCard
             key={service.title}
             service={service}
-            active={active === index}
-            onToggle={() => setActive(active === index ? -1 : index)}
           />
         ))}
       </div>
@@ -541,12 +501,13 @@ function PersonalSection() {
 }
 
 function CorporateSection() {
+  const [selected, setSelected] = useState(null);
   return (
     <section className="darkBand" id="corporate">
       <SectionTitle eyebrow="Specialized Services" title="DineshCPA offers tailored solutions" light />
       <div className="specialGrid">
-        {specializedServices.map((service, index) => (
-          <ServiceCard key={service.title} service={service} active={index === 0} onToggle={() => {}} />
+        {specializedServices.map((service) => (
+          <ServiceCard key={service.title} service={service} />
         ))}
       </div>
       <div className="corporateDepth">
@@ -559,13 +520,33 @@ function CorporateSection() {
         </div>
         <ul>
           {corporateServices.map((service) => (
-            <li key={service}>
-              <Check size={17} />
-              {service}
+            <li key={service.title}>
+              <button type="button" className="corporateServiceButton" aria-haspopup="dialog" onClick={() => setSelected(service)}>
+                <span>{service.title}</span><Plus size={18} aria-hidden="true" />
+              </button>
             </li>
           ))}
         </ul>
       </div>
+      {selected && <ServiceDialog service={selected} open onClose={() => setSelected(null)} />}
+    </section>
+  );
+}
+
+function TechnologyPartner() {
+  return (
+    <section className="section partnerSection" id="technology-partner" aria-labelledby="partner-heading">
+      <div className="partnerBadge"><Layers size={28} aria-hidden="true" /><span>Technology partner</span><strong>Boldsmith</strong></div>
+      <div className="partnerCopy">
+        <span className="dialogEyebrow">Better systems. Clearer books.</span>
+        <h2 id="partner-heading">Ask about free bookkeeping.</h2>
+        <p>Explore free bookkeeping options through our technology partner, Boldsmith. Find out what’s available and how it could fit your business.</p>
+      </div>
+      <div className="partnerActions">
+          <a className="button dark" href={PARTNER_URL} target="_blank" rel="sponsored noopener noreferrer">Explore with Boldsmith <ArrowRight size={17} aria-hidden="true" /><span className="srOnly"> (opens in a new tab)</span></a>
+          <a className="textLink" href="#contact">Talk to Dinesh CPA</a>
+      </div>
+      <p className="partnerNote">Dinesh CPA technology partner · Referral link to Boldsmith</p>
     </section>
   );
 }
@@ -609,6 +590,7 @@ function ExpandedServices() {
 }
 
 function IndustrySection() {
+  const [expanded, setExpanded] = useState(false);
   return (
     <section className="industryBand" id="industries">
       <div className="industryShell">
@@ -619,7 +601,8 @@ function IndustrySection() {
             needs, so industry detail connects back to the tax work that has to be done.
           </p>
         </div>
-        <div className="industryGrid">
+        <div>
+        <div id="industry-list" className={`industryGrid ${expanded ? "expanded" : ""}`}>
           {industries.map((industry) => (
             <article key={industry.title}>
               <span>{String(industry.index + 1).padStart(2, "0")}</span>
@@ -627,6 +610,10 @@ function IndustrySection() {
               <p>{industry.summary}</p>
             </article>
           ))}
+        </div>
+        <button type="button" className="industryToggle button light" aria-expanded={expanded} aria-controls="industry-list" onClick={() => setExpanded(!expanded)}>
+          {expanded ? "Show fewer industries" : `View all ${industries.length} industries`} <ChevronDown className={expanded ? "rotated" : ""} size={18} />
+        </button>
         </div>
       </div>
     </section>
@@ -775,8 +762,8 @@ function ContactSection() {
         <article className="outlineCard">
           <Smartphone size={45} />
           <h3>Call or Email</h3>
-          <p>+1 (855) DINESH1</p>
-          <p>info@dineshcpa.ca</p>
+          <p><a href="tel:+18553463741">+1 (855) DINESH1</a></p>
+          <p><a href="mailto:info@dineshcpa.ca">info@dineshcpa.ca</a></p>
         </article>
       </div>
       <div className="contactGrid">
@@ -788,10 +775,14 @@ function ContactSection() {
             setSubmitted(true);
           }}
         >
-          <input required placeholder="Name *" />
-          <input required type="email" placeholder="Email Address *" />
-          <input placeholder="Phone Number" />
-          <textarea required placeholder="Message *" />
+          <label className="srOnly" htmlFor="contact-name">Name (required)</label>
+          <input id="contact-name" name="name" autoComplete="name" required placeholder="Name *" />
+          <label className="srOnly" htmlFor="contact-email">Email address (required)</label>
+          <input id="contact-email" name="email" autoComplete="email" required type="email" placeholder="Email Address *" />
+          <label className="srOnly" htmlFor="contact-phone">Phone number (optional)</label>
+          <input id="contact-phone" name="phone" autoComplete="tel" type="tel" placeholder="Phone Number" />
+          <label className="srOnly" htmlFor="contact-message">Message (required)</label>
+          <textarea id="contact-message" name="message" required placeholder="Message *" />
           <button className="button dark" type="submit">
             {submitted ? "Message Ready" : "Message"}
           </button>
@@ -817,12 +808,12 @@ function Faqs() {
       <SectionTitle eyebrow="FAQs" title="Clear answers before you start" />
       <div className="faqList">
         {faqs.map((item, index) => (
-          <article className="faqItem" key={item.q}>
-            <button onClick={() => setOpen(open === index ? -1 : index)}>
+          <article className={`faqItem ${open === index ? "open" : ""}`} key={item.q}>
+            <button aria-expanded={open === index} aria-controls={`faq-answer-${index}`} onClick={() => setOpen(open === index ? -1 : index)}>
               {item.q}
               <ChevronDown className={open === index ? "rotated" : ""} size={22} />
             </button>
-            {open === index && <p>{item.a}</p>}
+            <div id={`faq-answer-${index}`} className="faqAnswer" aria-hidden={open !== index}><div><p>{item.a}</p></div></div>
           </article>
         ))}
       </div>
@@ -844,7 +835,7 @@ function Footer() {
       </div>
       <div className="footerGrid">
         <div>
-          <a className="button dark" href="#contact">Book Free 10-Year Review</a>
+          <a className="button dark" href="#contact">Book a 10-Year Review</a>
           <a className="button ghost" href="#contact">Schedule a Consultation</a>
           <div className="socials">
             {["ig", "f", "yt", "in"].map((item) => (
@@ -861,11 +852,12 @@ function Footer() {
           <a href="#industries">Industries</a>
           <a href="#insights">Insights</a>
           <a href="#faqs">FAQs</a>
+          <a href={PARTNER_URL} target="_blank" rel="sponsored noopener noreferrer">Technology partner: Boldsmith<span className="srOnly"> (opens in a new tab)</span></a>
         </div>
         <div className="footerList">
           <h3>Corporate</h3>
           {corporateServices.slice(0, 8).map((item) => (
-            <a href="#corporate" key={item}>{item}</a>
+              <a href="#corporate" key={item.title}>{item.title}</a>
           ))}
         </div>
         <form
@@ -909,6 +901,7 @@ function App() {
         <ReviewCta />
         <PersonalSection />
         <ExpandedServices />
+        <TechnologyPartner />
         <CorporateSection />
         <IndustrySection />
         <CoverageSection />
@@ -919,6 +912,7 @@ function App() {
         <Faqs />
       </main>
       <Footer />
+      <Experience />
     </>
   );
 }
