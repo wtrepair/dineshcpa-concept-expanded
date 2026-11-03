@@ -15,5 +15,9 @@
     "react-dom": "^19.0.0",
     "lucide-react": "^0.468.0"
   },
-  "devDependencies": {}
+  "devDependencies": {},
+  "overrides": {
+    "source-map-js": "^1.2.2",
+    "postcss": "^8.5.23"
+  }
 }
